@@ -1,7 +1,7 @@
 use chrono::{DateTime, TimeZone, Utc};
 use serde::{self, Deserialize, Deserializer, Serializer};
 
-const FORMAT: &'static str = "%Y%m%dT%H%M%SZ";
+const FORMAT: &str = "%Y%m%dT%H%M%SZ";
 
 pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
 where
