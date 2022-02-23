@@ -1,4 +1,5 @@
 mod datetime_format;
+mod notes;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
