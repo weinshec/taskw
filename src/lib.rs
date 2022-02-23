@@ -5,6 +5,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
+use std::str::FromStr;
 use uuid::Uuid;
 
 /// A Taskwarrior task
@@ -29,10 +30,12 @@ pub struct Task {
     pub project: Option<String>,
 
     /// An array of strings, where each string is a single word containing no spaces.
+    #[serde(default)]
     pub tags: Vec<String>,
 
     /// Annotations are strings with timestamps.
     /// Each annotation itself has an `entry` field and a `description` field.
+    #[serde(default)]
     pub annotations: Vec<Annotation>,
 
     /// Internally generated datetime this task has been modified at.
@@ -57,6 +60,22 @@ impl Task {
             modified: entry,
             unknown_fields: HashMap::new(),
         }
+    }
+}
+
+impl FromStr for Task {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // serde_json::from_str(s).map_err(|_| "Cannot deserialize task")
+        Ok(serde_json::from_str(s).unwrap())
+    }
+}
+
+impl std::fmt::Display for Task {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let task_str = serde_json::to_string(&self).map_err(|_| std::fmt::Error {})?;
+        write!(f, "{}", task_str)
     }
 }
 
