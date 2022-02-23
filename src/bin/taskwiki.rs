@@ -55,8 +55,8 @@ fn on_add() -> Result<(), &'static str> {
 
 fn on_modify() -> Result<(), &'static str> {
     let original_task = task_from_stdin()?;
-    let modified_task = task_from_stdin()?;
     debug!("task original = {:#?}", original_task);
+    let modified_task = task_from_stdin()?;
     debug!("task modified = {:#?}", modified_task);
     println!("{}", modified_task);
     Ok(())

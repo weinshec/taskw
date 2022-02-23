@@ -6,6 +6,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
+/// A notes file associated with a taskwarrior task
 struct NotesFile {
     path: PathBuf,
     header: Option<YamlMeta>,
