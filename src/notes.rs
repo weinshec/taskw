@@ -7,14 +7,14 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 /// A notes file associated with a taskwarrior task
-struct NotesFile {
+pub struct NotesFile {
     path: PathBuf,
     header: Option<YamlMeta>,
     content: String,
 }
 
 impl NotesFile {
-    fn new(path: &Path) -> Self {
+    pub fn new(path: &Path) -> Self {
         Self {
             path: path.to_path_buf(),
             header: None,
@@ -22,17 +22,17 @@ impl NotesFile {
         }
     }
 
-    fn with_header(mut self, header: YamlMeta) -> Self {
+    pub fn with_header(mut self, header: YamlMeta) -> Self {
         self.header = Some(header);
         self
     }
 
-    fn with_content(mut self, content: &str) -> Self {
+    pub fn with_content(mut self, content: &str) -> Self {
         self.content = content.to_string();
         self
     }
 
-    fn write(&self) -> Result<(), &'static str> {
+    pub fn write(&self) -> Result<(), &'static str> {
         let mut file =
             std::fs::File::create(&self.path).map_err(|_| "Cannot open file for writing")?;
         if let Some(header) = &self.header {
@@ -42,7 +42,7 @@ impl NotesFile {
         Ok(())
     }
 
-    fn open(path: &Path) -> Result<Self, &'static str> {
+    pub fn open(path: &Path) -> Result<Self, &'static str> {
         let document = std::fs::read_to_string(path).map_err(|_| "Cannot read notes file")?;
 
         let (header, content) = match split_yaml_header(&document) {
@@ -62,17 +62,17 @@ impl NotesFile {
 }
 
 #[derive(Serialize, Deserialize)]
-struct YamlMeta {
+pub struct YamlMeta {
     title: String,
     date: NaiveDate,
     keywords: Vec<String>,
 
     #[serde(flatten)]
-    pub unknown_fields: HashMap<String, Value>,
+    unknown_fields: HashMap<String, Value>,
 }
 
 impl YamlMeta {
-    fn new(title: &str, date: NaiveDate) -> Self {
+    pub fn new(title: &str, date: NaiveDate) -> Self {
         Self {
             title: title.to_string(),
             date,

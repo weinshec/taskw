@@ -1,7 +1,8 @@
 use clap::{Parser, Subcommand};
 use env_logger::Env;
-use log::debug;
 use std::str::FromStr;
+use taskw::config::Config;
+use taskw::hooks::Hooks;
 use taskw::Task;
 
 /// taskwarrior hooks into vimwiki
@@ -26,16 +27,29 @@ enum Commands {
 
 fn main() -> Result<(), &'static str> {
     let cli = Cli::parse();
+    let cfg = Config::default().to_static();
     let env = match cli.debug {
         true => Env::default().filter_or("RUST_LOG", "DEBUG"),
         false => Env::default().filter_or("RUST_LOG", "ERROR"),
     };
     env_logger::init_from_env(env);
 
+    let hooks = Hooks::with_config(cfg);
     match &cli.command {
-        Commands::Add => on_add(),
-        Commands::Modify => on_modify(),
+        Commands::Add => {
+            let added_task = task_from_stdin()?;
+            let (task, feedback) = hooks.on_add(added_task)?;
+            println!("{}\n{}", task, feedback);
+        }
+        Commands::Modify => {
+            let original_task = task_from_stdin()?;
+            let modified_task = task_from_stdin()?;
+            let (task, feedback) = hooks.on_modify(original_task, modified_task)?;
+            println!("{}\n{}", task, feedback);
+        }
     }
+
+    Ok(())
 }
 
 fn task_from_stdin() -> Result<Task, &'static str> {
@@ -44,20 +58,4 @@ fn task_from_stdin() -> Result<Task, &'static str> {
         .read_line(&mut json)
         .map_err(|_| "cannot read from stdin")?;
     Task::from_str(json.trim())
-}
-
-fn on_add() -> Result<(), &'static str> {
-    let new_task = task_from_stdin()?;
-    debug!("task added = {:#?}", new_task);
-    println!("{}", new_task);
-    Ok(())
-}
-
-fn on_modify() -> Result<(), &'static str> {
-    let original_task = task_from_stdin()?;
-    debug!("task original = {:#?}", original_task);
-    let modified_task = task_from_stdin()?;
-    debug!("task modified = {:#?}", modified_task);
-    println!("{}", modified_task);
-    Ok(())
 }

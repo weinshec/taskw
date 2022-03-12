@@ -2,7 +2,7 @@ use crate::datetime_format;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -29,7 +29,7 @@ pub struct Task {
 
     /// An array of strings, where each string is a single word containing no spaces.
     #[serde(default)]
-    pub tags: Vec<String>,
+    pub tags: HashSet<String>,
 
     /// Annotations are strings with timestamps.
     /// Each annotation itself has an `entry` field and a `description` field.
@@ -43,6 +43,32 @@ pub struct Task {
     /// All other attributes not explicitly captured by any other given field.
     #[serde(flatten)]
     pub unknown_fields: HashMap<String, Value>,
+}
+
+impl Task {
+    pub fn new(description: &str) -> Self {
+        let now = Utc::now();
+        Self {
+            status: Status::Pending,
+            uuid: Uuid::new_v4(),
+            entry: now,
+            description: description.to_string(),
+            project: None,
+            tags: HashSet::new(),
+            annotations: vec![],
+            modified: now,
+            unknown_fields: HashMap::new(),
+        }
+    }
+
+    pub fn with_tag(mut self, tag: &str) -> Self {
+        self.tags.insert(tag.to_string());
+        self
+    }
+
+    pub fn has_tag(&self, tag: &str) -> bool {
+        self.tags.contains(&tag.to_string())
+    }
 }
 
 impl FromStr for Task {
@@ -88,6 +114,16 @@ pub struct Annotation {
     pub description: String,
 }
 
+impl Annotation {
+    pub fn new(description: &str) -> Self {
+        let now = Utc::now();
+        Self {
+            entry: now,
+            description: description.to_string(),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -122,7 +158,7 @@ mod tests {
         assert_eq!(task.status, Status::Pending);
         assert_eq!(task.entry, Utc.ymd(2022, 1, 10).and_hms(17, 16, 19));
         assert_eq!(task.modified, Utc.ymd(2022, 1, 11).and_hms(7, 41, 12));
-        assert_eq!(task.tags, vec![String::from("wiki")]);
+        assert!(task.tags.contains(&String::from("wiki")));
         assert_eq!(
             task.annotations,
             vec![Annotation {
@@ -145,5 +181,12 @@ mod tests {
         let task: Task = serde_json::from_str(TASK_JSON).expect("deserialization succeeded");
         let serialized = serde_json::to_string(&task).expect("serialization succeeded");
         assert!(serialized.contains("dde3720b-003f-4776-8e15-61e5d90376af"));
+    }
+
+    #[test]
+    fn task_has_tag() {
+        let task: Task = serde_json::from_str(TASK_JSON).expect("deserialization succeeded");
+        assert!(task.has_tag("wiki"));
+        assert!(!task.has_tag("foobar"));
     }
 }
