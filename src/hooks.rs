@@ -61,8 +61,8 @@ impl Hooks {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tempfile::tempdir;
     use std::path::Path;
+    use tempfile::tempdir;
 
     fn test_cfg(dir: &Path) -> &'static Config {
         let mut cfg = Config::default();
