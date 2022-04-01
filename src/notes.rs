@@ -42,7 +42,7 @@ impl NotesFile {
         Ok(())
     }
 
-    pub fn open(path: &Path) -> Result<Self, &'static str> {
+    pub fn read(path: &Path) -> Result<Self, &'static str> {
         let document = std::fs::read_to_string(path).map_err(|_| "Cannot read notes file")?;
 
         let (header, content) = match split_yaml_header(&document) {
@@ -164,7 +164,7 @@ mod tests {
         let mut test_notes_file = NamedTempFile::new().expect("created tempfile");
         write!(test_notes_file, "{}", document_str).expect("writing tempfile");
 
-        let notes_file = NotesFile::open(test_notes_file.path()).expect("reading notes files");
+        let notes_file = NotesFile::read(test_notes_file.path()).expect("reading notes files");
         assert_eq!(notes_file.content, content_str);
         assert_eq!(notes_file.path, test_notes_file.path());
         assert!(notes_file.header.is_some());
@@ -177,7 +177,7 @@ mod tests {
         let mut test_notes_file = NamedTempFile::new().expect("created tempfile");
         write!(test_notes_file, "{}", document_str).expect("writing tempfile");
 
-        let notes_file = NotesFile::open(test_notes_file.path()).expect("reading notes files");
+        let notes_file = NotesFile::read(test_notes_file.path()).expect("reading notes files");
         assert_eq!(notes_file.content, document_str);
         assert!(notes_file.header.is_none());
     }
@@ -191,7 +191,7 @@ mod tests {
         let mut test_notes_file = NamedTempFile::new().expect("created tempfile");
         write!(test_notes_file, "{}", document_str).expect("writing tempfile");
 
-        let notes_file = NotesFile::open(test_notes_file.path()).expect("reading notes files");
+        let notes_file = NotesFile::read(test_notes_file.path()).expect("reading notes files");
         assert_eq!(notes_file.content, content_str);
         assert!(notes_file.header.is_none());
     }

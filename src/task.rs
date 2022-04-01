@@ -7,7 +7,7 @@ use std::str::FromStr;
 use uuid::Uuid;
 
 /// A Taskwarrior task
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Task {
     /// The state of the task, one of ["pending", "deleted", "completed", "waiting", "recurring"].
     pub status: Status,
@@ -88,7 +88,7 @@ impl std::fmt::Display for Task {
 }
 
 /// Status field of a taskwarrior task
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Status {
     /// A pending task is a task that has not yet been completed or deleted.
@@ -107,7 +107,7 @@ pub enum Status {
 }
 
 /// Annotations to a taskwarrior are pairs of "entry" (datetime) and "description" (String)
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Annotation {
     #[serde(with = "datetime_format")]
     pub entry: DateTime<Utc>,

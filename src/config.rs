@@ -22,7 +22,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             notes_tag: String::from("wiki"),
-            notes_dir: PathBuf::from("/home/weinshec/scratch"),
+            notes_dir: PathBuf::from("/home/pweinshec/scratch"),
             notes_ext: String::from("md"),
         }
     }
